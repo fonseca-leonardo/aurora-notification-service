@@ -13,6 +13,7 @@ module.exports = {
           '@shared': './src/shared',
           '@infra': './src/infra',
           '@constants': './src/constants',
+          '@services': './src/services',
         },
       },
     ],
