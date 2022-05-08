@@ -1,0 +1,52 @@
+
+   
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master, dev ]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull repo
+        uses: actions/checkout@v2
+        
+      -
+        name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        
+      -
+        name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        
+      -
+        name: Available plataforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+        
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      -
+        name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: |-
+            linux/amd64
+            linux/arm64
+          file: ./Dockerfile
+          push: true
+          tags: leonardof45/aurora-notification-service:${{ steps.extract_branch.outputs.branch }}
